@@ -1,0 +1,675 @@
+/* ================================================================
+   style.css — Dinner Invitation
+   Dark glassmorphism · Rose accent · Poppins · Mobile-first
+   ================================================================ */
+
+/* ──────────────────────────────────────────────────────────────────
+   0. Google Fonts fallback import (redundant if <link> loads fine)
+──────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ──────────────────────────────────────────────────────────────────
+   1. Design tokens
+──────────────────────────────────────────────────────────────────── */
+:root {
+  /* Color palette */
+  --bg:               #0F172A;          /* slate-900 */
+  --bg-raised:        #1E293B;          /* slate-800 */
+  --accent:           #F472B6;          /* rose-400  */
+  --accent-deep:      #EC4899;          /* rose-500  */
+  --accent-muted:     rgba(244,114,182,0.12);
+  --accent-border:    rgba(244,114,182,0.40);
+  --accent-glow:      rgba(244,114,182,0.35);
+  --purple-soft:      #C084FC;          /* violet-400 */
+
+  --text-primary:     #F8FAFC;          /* slate-50  */
+  --text-secondary:   #94A3B8;          /* slate-400 */
+  --text-muted:       #64748B;          /* slate-500 */
+
+  /* Glass effect */
+  --glass-bg:         rgba(255,255,255,0.04);
+  --glass-border:     rgba(255,255,255,0.09);
+  --glass-highlight:  rgba(255,255,255,0.06);
+
+  /* Shape */
+  --radius-card:  22px;
+  --radius-btn:   50px;
+  --radius-opt:   14px;
+
+  /* Shadows */
+  --shadow-card:  0 24px 56px rgba(0,0,0,0.55),
+                  inset 0 1px 0 rgba(255,255,255,0.05);
+  --shadow-btn:   0 8px 28px rgba(244,114,182,0.40);
+
+  /* Typography */
+  --font: 'Poppins', system-ui, -apple-system, sans-serif;
+
+  /* Easing curves */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   2. Reset
+──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  /* Center the card vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   3. Star canvas (fixed behind everything)
+──────────────────────────────────────────────────────────────────── */
+#stars {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   4. Sparkles (floating emoji elements, z above cards)
+──────────────────────────────────────────────────────────────────── */
+#sparkles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  pointer-events: none;
+  animation: sparkle-float 1.8s var(--ease-out-expo) forwards;
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+@keyframes sparkle-float {
+  0%   { transform: translateY(0)     scale(0.3) rotate(0deg);   opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(-130px) scale(1.1) rotate(200deg); opacity: 0; }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   5. Confetti canvas (above everything during burst)
+──────────────────────────────────────────────────────────────────── */
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 80;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   6. App layout
+──────────────────────────────────────────────────────────────────── */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem 2rem; /* top pad for progress dots */
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   7. Progress dots
+──────────────────────────────────────────────────────────────────── */
+.progress {
+  position: fixed;
+  top: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out-expo);
+}
+
+.progress.visible { opacity: 1; }
+
+.progress-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Default dot: dim circle */
+.dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.14);
+  transition:
+    width       0.4s var(--ease-out-expo),
+    background  0.4s var(--ease-out-expo),
+    border-radius 0.4s var(--ease-out-expo),
+    box-shadow  0.4s var(--ease-out-expo);
+}
+
+/* Completed dot: solid rose */
+.dot.completed {
+  background: var(--accent);
+}
+
+/* Active dot: rose pill */
+.dot.active {
+  width: 22px;
+  border-radius: 4px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   8. Card wrapper and screen transitions
+──────────────────────────────────────────────────────────────────── */
+.card-wrapper {
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+}
+
+/* Hidden by default */
+.screen {
+  display: none;
+}
+
+/* Entering screen */
+.screen.active {
+  display: block;
+  animation: screen-enter 0.48s var(--ease-out-expo) both;
+}
+
+/* Exiting screen (class added by JS, then removed after delay) */
+.screen.exiting {
+  display: block;
+  pointer-events: none;
+  animation: screen-exit 0.36s var(--ease-in) both;
+}
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screen-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   9. Glass card
+──────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Diagonal highlight at top-left (refraction illusion) */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.07) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+/* Celebration variant: subtle rose glow */
+.card-celebration {
+  border-color: rgba(244,114,182,0.20);
+  box-shadow:
+    var(--shadow-card),
+    0 0 60px rgba(244,114,182,0.10);
+}
+
+/* Inner content column */
+.card-inner {
+  padding: 2.4rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.15rem;
+}
+
+/* Slightly more padding on wider screens */
+@media (min-width: 480px) {
+  .card-inner {
+    padding: 3rem 2.6rem;
+    gap: 1.25rem;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   10. Typography
+──────────────────────────────────────────────────────────────────── */
+.heading {
+  font-size: clamp(1.55rem, 5.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.subtext {
+  font-size: 0.975rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+/* Small uppercase label above heading */
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* The big romantic question on screen 6 */
+.big-question {
+  font-size: clamp(1.15rem, 4vw, 1.45rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+/* AI-generated summary sentence */
+.summary-text {
+  font-size: 0.93rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 0.9rem 1.1rem;
+  background: rgba(244,114,182,0.06);
+  border: 1px solid rgba(244,114,182,0.14);
+  border-radius: 12px;
+  width: 100%;
+}
+
+/* Thin rose gradient divider */
+.divider {
+  width: 36px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg, transparent, var(--accent), transparent
+  );
+  margin: 0.1rem auto;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   11. Screen icons (wave + celebration)
+──────────────────────────────────────────────────────────────────── */
+.screen-icon {
+  font-size: 2.8rem;
+  display: block;
+  line-height: 1;
+}
+
+/* Waving hand on screen 1 */
+.wave-icon {
+  animation: wave 1.8s ease-in-out infinite;
+  transform-origin: 70% 70%;
+  will-change: transform;
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(16deg); }
+  40%       { transform: rotate(-6deg); }
+  60%       { transform: rotate(14deg); }
+  80%       { transform: rotate(-4deg); }
+}
+
+/* Bounce-in for celebration emoji */
+.celebration-icon {
+  animation: celebration-bounce 0.65s var(--ease-out-expo) both;
+  will-change: transform;
+}
+
+@keyframes celebration-bounce {
+  from { transform: scale(0) rotate(-15deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   12. Primary CTA button
+──────────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.975rem;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 0.875rem 2rem;
+  white-space: nowrap;
+  transition:
+    transform       0.25s var(--ease-out-expo),
+    box-shadow      0.25s var(--ease-out-expo),
+    background      0.25s var(--ease-out-expo),
+    border-color    0.25s var(--ease-out-expo);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #F472B6 0%, #EC4899 60%, #DB2777 100%);
+  color: #fff;
+  box-shadow: var(--shadow-btn);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 14px 36px rgba(244,114,182,0.55);
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 14px rgba(244,114,182,0.30);
+}
+
+/* Larger variant for the final CTA */
+.btn-large {
+  font-size: 1.08rem;
+  padding: 1rem 2.6rem;
+}
+
+/* Ghost secondary button */
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   13. Option buttons (choice cards)
+──────────────────────────────────────────────────────────────────── */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.8rem 1.05rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-opt);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: left;
+  transition:
+    background     0.22s var(--ease-out-expo),
+    border-color   0.22s var(--ease-out-expo),
+    transform      0.22s var(--ease-out-expo),
+    box-shadow     0.22s var(--ease-out-expo);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.option-btn:hover {
+  background: var(--accent-muted);
+  border-color: var(--accent-border);
+  transform: translateX(5px);
+}
+
+.option-btn:active {
+  transform: scale(0.97) translateX(2px);
+}
+
+/* Selected state (briefly visible before transition) */
+.option-btn.selected {
+  background: rgba(244,114,182,0.14);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.option-emoji {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  width: 1.9rem;
+  text-align: center;
+}
+
+.option-label {
+  flex: 1;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   14. Loading screen
+──────────────────────────────────────────────────────────────────── */
+
+/* Ring wrapper — positions ring and heart together */
+.loader-ring-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Spinning rose ring */
+.loader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(244,114,182,0.15);
+  border-top-color: var(--accent);
+  animation: spin 1s linear infinite;
+  will-change: transform;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Beating heart at center */
+.loader-heart {
+  font-size: 1.4rem;
+  animation: heartbeat 1s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1);    }
+  30%       { transform: scale(1.18); }
+  60%       { transform: scale(0.92); }
+}
+
+/* Progress track */
+.loader-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* Animated fill — width driven by JS */
+.loader-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--purple-soft));
+  border-radius: 999px;
+  box-shadow: 0 0 10px var(--accent-glow);
+  /* JS updates width directly; no CSS transition to keep it frame-accurate */
+}
+
+.loader-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  min-height: 1.2em;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   15. Reservation details (screen 7)
+──────────────────────────────────────────────────────────────────── */
+.reservation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 0.95rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  text-align: left;
+  animation: detail-slide-in 0.5s var(--ease-out-expo) both;
+}
+
+/* Stagger each row */
+.detail-row:nth-child(1) { animation-delay: 0.1s; }
+.detail-row:nth-child(2) { animation-delay: 0.2s; }
+.detail-row:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes detail-slide-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.detail-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.detail-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.detail-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   16. Responsive — wider screens
+──────────────────────────────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .card-wrapper {
+    max-width: 480px;
+  }
+
+  .heading {
+    font-size: 2rem;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   17. prefers-reduced-motion — collapse all animations
+──────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:      0.01ms !important;
+    scroll-behavior:          auto    !important;
+  }
+
+  /* Keep screens visible instantly instead of fading */
+  .screen.active  { animation: none; }
+  .screen.exiting { animation: none; display: none; }
+
+  /* Hide sparkle elements entirely */
+  .sparkle { display: none !important; }
+
+  /* Keep loader fill working (JS sets width via style) */
+  .loader-fill { transition: none; }
+}

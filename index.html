@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Little Invitation</title>
+
+  <!-- Poppins from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Ambient star field (canvas drawn by JS) ──────────────────────── -->
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <!-- ── Floating sparkle emojis injected by JS after acceptance ────────── -->
+  <div id="sparkles" aria-hidden="true"></div>
+
+  <!-- ── Confetti burst canvas (drawn by JS after acceptance) ──────────── -->
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       Main app shell — only one .screen.active at a time
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <main class="app" role="main">
+
+    <!-- Step-progress dot indicator (hidden on screens 1 and 7) -->
+    <nav
+      class="progress"
+      id="progress"
+      aria-label="Step progress"
+      aria-hidden="true"
+    >
+      <div class="progress-dots" role="list">
+        <span class="dot" role="listitem" aria-label="Step 1"></span>
+        <span class="dot" role="listitem" aria-label="Step 2"></span>
+        <span class="dot" role="listitem" aria-label="Step 3"></span>
+        <span class="dot" role="listitem" aria-label="Step 4"></span>
+      </div>
+    </nav>
+
+    <div class="card-wrapper" id="card-wrapper">
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 1 — Intro
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen active" id="screen-1" aria-labelledby="s1-title">
+        <div class="card">
+          <div class="card-inner">
+            <div class="screen-icon wave-icon" aria-hidden="true">👋</div>
+            <h1 id="s1-title" class="heading">Hey</h1>
+            <p class="subtext">I need your help planning something.</p>
+            <button
+              class="btn btn-primary"
+              onclick="goToScreen(2)"
+            >
+              Let's go <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 2 — Food choice
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-2" aria-labelledby="s2-title">
+        <div class="card">
+          <div class="card-inner">
+            <h2 id="s2-title" class="heading">What are you craving today?</h2>
+            <div class="options" role="group" aria-labelledby="s2-title">
+              <button class="option-btn" onclick="selectChoice('food','sushi',this)">
+                <span class="option-emoji" aria-hidden="true">🍣</span>
+                <span class="option-label">Sushi</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('food','italian',this)">
+                <span class="option-emoji" aria-hidden="true">🍝</span>
+                <span class="option-label">Italian</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('food','bbq',this)">
+                <span class="option-emoji" aria-hidden="true">🍖</span>
+                <span class="option-label">BBQ</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('food','burgers',this)">
+                <span class="option-emoji" aria-hidden="true">🍔</span>
+                <span class="option-label">Burgers</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('food','surprise',this)">
+                <span class="option-emoji" aria-hidden="true">🤔</span>
+                <span class="option-label">Surprise me</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 3 — Evening vibe
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-3" aria-labelledby="s3-title">
+        <div class="card">
+          <div class="card-inner">
+            <h2 id="s3-title" class="heading">What kind of evening sounds nice?</h2>
+            <div class="options" role="group" aria-labelledby="s3-title">
+              <button class="option-btn" onclick="selectChoice('vibe','fancy',this)">
+                <span class="option-emoji" aria-hidden="true">✨</span>
+                <span class="option-label">Fancy</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('vibe','cozy',this)">
+                <span class="option-emoji" aria-hidden="true">☕</span>
+                <span class="option-label">Cozy</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('vibe','city',this)">
+                <span class="option-emoji" aria-hidden="true">🌃</span>
+                <span class="option-label">City lights</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('vibe','quiet',this)">
+                <span class="option-emoji" aria-hidden="true">🌿</span>
+                <span class="option-label">Somewhere quiet</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 4 — Dessert
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-4" aria-labelledby="s4-title">
+        <div class="card">
+          <div class="card-inner">
+            <h2 id="s4-title" class="heading">One important question...</h2>
+            <p class="subtext">Dessert?</p>
+            <div class="options" role="group" aria-labelledby="s4-title">
+              <button class="option-btn" onclick="selectChoice('dessert','absolutely',this)">
+                <span class="option-emoji" aria-hidden="true">🍰</span>
+                <span class="option-label">Absolutely</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('dessert','of_course',this)">
+                <span class="option-emoji" aria-hidden="true">🍦</span>
+                <span class="option-label">Of course</span>
+              </button>
+              <button class="option-btn" onclick="selectChoice('dessert','later',this)">
+                <span class="option-emoji" aria-hidden="true">😌</span>
+                <span class="option-label">We'll decide later</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 5 — Loading / searching
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-5" aria-labelledby="s5-title" aria-live="polite">
+        <div class="card">
+          <div class="card-inner">
+
+            <!-- Pulsing ring with heart center -->
+            <div class="loader-ring-wrap" aria-hidden="true">
+              <div class="loader-ring"></div>
+              <span class="loader-heart">💓</span>
+            </div>
+
+            <h2 id="s5-title" class="heading">Finding the perfect date...</h2>
+
+            <div
+              class="loader-track"
+              role="progressbar"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-labelledby="s5-title"
+              id="loader-track"
+            >
+              <div class="loader-fill" id="loader-fill"></div>
+            </div>
+
+            <p class="loader-label" id="loader-label" aria-hidden="true">0%</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 6 — Reveal and final question
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-6" aria-labelledby="s6-title">
+        <div class="card">
+          <div class="card-inner">
+            <p class="eyebrow">Mission complete!</p>
+            <h2 id="s6-title" class="heading">
+              You've successfully designed our perfect dinner.
+            </h2>
+
+            <!-- Populated by buildSummary() in script.js -->
+            <p class="summary-text" id="summary-text" aria-live="polite"></p>
+
+            <div class="divider" aria-hidden="true"></div>
+
+            <p class="subtext">There's just one last thing...</p>
+            <p class="big-question">Will you go to dinner with me?</p>
+
+            <button class="btn btn-primary btn-large" onclick="accept()">
+              ❤️ Yes, let's go!
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────────────
+           SCREEN 7 — Acceptance / confirmation
+      ──────────────────────────────────────────────────────────────────── -->
+      <section class="screen" id="screen-7" aria-labelledby="s7-title">
+        <div class="card card-celebration">
+          <div class="card-inner">
+            <div class="screen-icon celebration-icon" aria-hidden="true">🎉</div>
+
+            <p class="eyebrow">Reservation accepted.</p>
+            <h2 id="s7-title" class="heading">I can't wait ❤️</h2>
+
+            <!-- Reservation placeholders -->
+            <div class="reservation-details" aria-label="Reservation details">
+              <div class="detail-row">
+                <span class="detail-icon" aria-hidden="true">📅</span>
+                <div class="detail-content">
+                  <span class="detail-label">Date</span>
+                  <span class="detail-value">To be announced</span>
+                </div>
+              </div>
+              <div class="detail-row">
+                <span class="detail-icon" aria-hidden="true">🕖</span>
+                <div class="detail-content">
+                  <span class="detail-label">Time</span>
+                  <span class="detail-value">To be announced</span>
+                </div>
+              </div>
+              <div class="detail-row">
+                <span class="detail-icon" aria-hidden="true">📍</span>
+                <div class="detail-content">
+                  <span class="detail-label">Restaurant</span>
+                  <span class="detail-value">To be announced</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="addToCalendar()">
+              Add to Calendar
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /.card-wrapper -->
+  </main><!-- /.app -->
+
+  <script src="script.js"></script>
+</body>
+</html>
